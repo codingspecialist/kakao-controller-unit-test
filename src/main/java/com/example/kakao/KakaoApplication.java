@@ -9,7 +9,11 @@ import org.springframework.security.config.annotation.authentication.configurati
 
 @SpringBootApplication
 public class KakaoApplication {
+
+
+
 	public static void main(String[] args) {
 		SpringApplication.run(KakaoApplication.class, args);
 	}
+
 }
