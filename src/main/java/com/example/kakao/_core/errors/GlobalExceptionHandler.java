@@ -10,11 +10,11 @@ import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
 
-//@RequiredArgsConstructor
+@RequiredArgsConstructor
 @Component
 public class GlobalExceptionHandler {
 
-    //private final ErrorLogJPARepository errorLogJPARepository;
+    private final ErrorLogJPARepository errorLogJPARepository;
 
     public ResponseEntity<?> handle(RuntimeException e, HttpServletRequest request){
         if(e instanceof Exception400){
@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
                     .userAgent(request.getHeader("User-Agent"))
                     .userIp(request.getRemoteAddr())
                     .build();
-            //errorLogJPARepository.save(errorLog);
+            errorLogJPARepository.save(errorLog);
             Exception500 ex = (Exception500) e;
             return new ResponseEntity<>(
                     ex.body(),
@@ -59,7 +59,7 @@ public class GlobalExceptionHandler {
                     .userAgent(request.getHeader("User-Agent"))
                     .userIp(request.getRemoteAddr())
                     .build();
-            //errorLogJPARepository.save(errorLog);
+            errorLogJPARepository.save(errorLog);
             return new ResponseEntity<>(
                     "unknown server error",
                     HttpStatus.INTERNAL_SERVER_ERROR

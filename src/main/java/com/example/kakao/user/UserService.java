@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +20,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Service
 public class UserService {
-    private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
     private final UserJPARepository userJPARepository;
 
@@ -43,15 +43,14 @@ public class UserService {
     }
 
     public String login(UserRequest.LoginDTO requestDTO) {
-        try {
-            UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
-                    = new UsernamePasswordAuthenticationToken(requestDTO.getEmail(), requestDTO.getPassword());
-            Authentication authentication = authenticationManager.authenticate(usernamePasswordAuthenticationToken);
-            CustomUserDetails myUserDetails = (CustomUserDetails) authentication.getPrincipal();
-            return JWTProvider.create(myUserDetails.getUser());
-        } catch (Exception e) {
-            throw new Exception401("인증되지 않았습니다");
+        User userPS = userJPARepository.findByEmail(requestDTO.getEmail()).orElseThrow(
+                () -> new Exception400("이메일을 찾을 수 없습니다 : "+requestDTO.getEmail())
+        );
+
+        if(!passwordEncoder.matches(requestDTO.getPassword(), userPS.getPassword())){
+            throw new Exception400("패스워드가 잘못입력되었습니다 ");
         }
+        return JWTProvider.create(userPS);
     }
 
     public void sameCheckEmail(String email) {

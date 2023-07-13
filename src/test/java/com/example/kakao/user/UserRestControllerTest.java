@@ -25,9 +25,6 @@ public class UserRestControllerTest {
     @MockBean
     private UserService userService;
 
-    @Spy
-    private AuthenticationManager authenticationManager;
-
     // @WebMvcTest를 하면 MockMvc가 SpringContext에 등록되기 때문에 DI할 수 있습니다.
     @Autowired
     private MockMvc mvc;

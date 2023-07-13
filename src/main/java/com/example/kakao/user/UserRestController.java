@@ -1,5 +1,6 @@
 package com.example.kakao.user;
 
+import com.example.kakao._core.errors.GlobalExceptionHandler;
 import com.example.kakao._core.errors.exception.Exception400;
 import com.example.kakao._core.errors.exception.Exception403;
 import com.example.kakao._core.security.CustomUserDetails;
@@ -22,6 +23,7 @@ import java.util.Map;
 @RestController
 public class UserRestController {
 
+    private final GlobalExceptionHandler globalExceptionHandler;
     private final UserService userService;
 
     @PostMapping("/join")
@@ -40,13 +42,12 @@ public class UserRestController {
             userService.join(requestDTO);
             return ResponseEntity.ok().body(ApiUtils.success(null));
         } catch (RuntimeException e) {
-            //return globalExceptionHandler.handle(e, request);
-            return ResponseEntity.ok().body(ApiUtils.success(null));
+            return globalExceptionHandler.handle(e, request);
         }
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody @Valid UserRequest.LoginDTO requestDTO, Errors errors) {
+    public ResponseEntity<?> login(@RequestBody @Valid UserRequest.LoginDTO requestDTO, Errors errors, HttpServletRequest request) {
 
         if (errors.hasErrors()) {
             List<FieldError> fieldErrors = errors.getFieldErrors();
@@ -57,9 +58,12 @@ public class UserRestController {
             );
         }
 
-        String jwt = userService.login(requestDTO);
-
-        return ResponseEntity.ok().header(JWTProvider.HEADER, jwt).body(ApiUtils.success(null));
+        try {
+            String jwt = userService.login(requestDTO);
+            return ResponseEntity.ok().header(JWTProvider.HEADER, jwt).body(ApiUtils.success(null));
+        }catch (RuntimeException e){
+            return globalExceptionHandler.handle(e, request);
+        }
     }
 
     @PostMapping("/users/{id}/update-password")
@@ -93,8 +97,7 @@ public class UserRestController {
             userService.updatePassword(requestDTO, id);
             return ResponseEntity.ok().body(ApiUtils.success(null));
         } catch (RuntimeException e) {
-            //return globalExceptionHandler.handle(e, request);
-            return ResponseEntity.ok().body(ApiUtils.success(null));
+            return globalExceptionHandler.handle(e, request);
         }
     }
 
@@ -119,8 +122,7 @@ public class UserRestController {
             UserResponse.FindById responseDTO = userService.findById(id);
             return ResponseEntity.ok().body(ApiUtils.success(responseDTO));
         } catch (RuntimeException e) {
-            //return globalExceptionHandler.handle(e, request);
-            return ResponseEntity.ok().body(ApiUtils.success(null));
+            return globalExceptionHandler.handle(e, request);
         }
     }
 
