@@ -7,6 +7,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.api.Assertions;
 import org.hibernate.Hibernate;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ public class ProductJPARepositoryTest extends DummyEntity {
 
     @BeforeEach
     public void setUp(){
+        em.createNativeQuery("ALTER TABLE product_tb ALTER COLUMN id RESTART WITH 1").executeUpdate();
         List<Product> productListPS = productJPARepository.saveAll(productDummyList());
         optionJPARepository.saveAll(optionDummyList(productListPS));
         em.clear();
